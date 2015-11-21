@@ -15,3 +15,7 @@ type HandleFunc func(context.Context, http.ResponseWriter, *http.Request)
 func (h HandleFunc) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	h(ctx, w, r)
 }
+
+func (h HandleFunc) Plug(_ Handler) Handler {
+	return h
+}

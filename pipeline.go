@@ -22,13 +22,8 @@ func (p *Pipeline) Handler() http.Handler {
 	})
 }
 
-func (p *Pipeline) Plug(plug Plugger) {
-	p.plugs = append(p.plugs, plug)
-
-}
-
-func (p *Pipeline) HandleFunc(fn func(ctx context.Context, w http.ResponseWriter, r *http.Request)) {
-	p.handle = HandleFunc(fn)
+func (p *Pipeline) Plug(plugs ...Plugger) {
+	p.plugs = append(p.plugs, plugs...)
 }
 
 func emptyHandleFunc(context.Context, http.ResponseWriter, *http.Request) {}
