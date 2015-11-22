@@ -9,7 +9,7 @@ type SubRouter struct {
 }
 
 func (sr *SubRouter) SubRouter(prefix string) *SubRouter {
-	sub := sr.father.SubRouter(sr, prefix)
+	sub := sr.father.subRouter(sr, prefix)
 	return sub
 }
 

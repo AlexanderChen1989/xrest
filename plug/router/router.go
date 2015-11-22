@@ -101,7 +101,11 @@ func (r *Router) Patch(path string, h xrest.Handler) {
 	r.handle(nil, PATCH, path, h)
 }
 
-func (r *Router) SubRouter(pre *SubRouter, prefix string) *SubRouter {
+func (r *Router) SubRouter(prefix string) *SubRouter {
+	return r.subRouter(nil, prefix)
+}
+
+func (r *Router) subRouter(pre *SubRouter, prefix string) *SubRouter {
 	prefix = filepath.Join("/", prefix)
 
 	var plugs []xrest.Plugger

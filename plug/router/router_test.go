@@ -15,7 +15,7 @@ func TestRouter(t *testing.T) {
 
 	router := NewRouter()
 
-	sr := router.SubRouter(nil, "/api")
+	sr := router.SubRouter("/api")
 
 	auth := sr.SubRouter("/auth")
 	noauth := sr.SubRouter("/noauth")
