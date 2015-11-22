@@ -1,71 +1,94 @@
 package router
 
 import (
-	"net/http"
+	"path/filepath"
 
 	"github.com/AlexanderChen1989/xrest"
-	"golang.org/x/net/context"
+)
+
+const (
+	GET   = "GET"
+	POST  = "POST"
+	PUT   = "PUT"
+	PATCH = "PATCH"
 )
 
 type Router struct {
-	NotFound  xrest.HandleFunc
 	methodMap map[string]map[string]xrest.Handler
+
+	subs map[string]*xrest.Pipeline
 }
-
-func (router *Router) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	if mm := router.methodMap[r.Method]; mm != nil {
-		if handler := mm[r.URL.Path]; handler != nil {
-			handler.ServeHTTP(ctx, w, r)
-			return
-		}
-	}
-
-	router.NotFound(ctx, w, r)
-}
-
-func (router *Router) Plug(h xrest.Handler) xrest.Handler {
-	return router
-}
-
-func notFound(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not Found.", http.StatusNotFound)
-}
-
-const GET = "GET"
-const POST = "POST"
-const PUT = "PUT"
-const PATCH = "PATCH"
 
 func NewRouter() *Router {
-	mm := make(map[string]map[string]xrest.Handler)
-
-	for _, m := range []string{GET, POST, PUT, PATCH} {
-		mm[m] = make(map[string]xrest.Handler)
+	mm := map[string]map[string]xrest.Handler{
+		GET:   map[string]xrest.Handler{},
+		POST:  map[string]xrest.Handler{},
+		PUT:   map[string]xrest.Handler{},
+		PATCH: map[string]xrest.Handler{},
 	}
 
-	router := &Router{
-		NotFound:  notFound,
+	subs := map[string]*xrest.Pipeline{}
+
+	return &Router{
 		methodMap: mm,
+		subs:      subs,
 	}
-	return router
 }
 
-func (router *Router) handle(method string, path string, h xrest.Handler) {
-	router.methodMap[method][path] = h
+type Route struct {
+	Method string
+	Path   string
 }
 
-func (router *Router) Get(path string, h xrest.Handler) {
-	router.handle(GET, path, h)
+func (r *Router) Routes() []Route {
+	var routes []Route
+	for method, m := range r.methodMap {
+		for p, _ := range m {
+			routes = append(routes, Route{Method: method, Path: p})
+		}
+	}
+	return routes
 }
 
-func (router *Router) Post(path string, h xrest.Handler) {
-	router.handle(POST, path, h)
+func (r *Router) handle(sub *SubRouter, method string, path string, h xrest.Handler) {
+	if sub != nil {
+		path = filepath.Join(sub.prefix, path)
+		pipe := r.subs[sub.prefix]
+		h = pipe.SetHandler(h).Handler()
+	}
+
+	r.methodMap[method][path] = h
 }
 
-func (router *Router) Put(path string, h xrest.Handler) {
-	router.handle(PUT, path, h)
+func (r *Router) Get(path string, h xrest.Handler) {
+	r.handle(nil, GET, path, h)
 }
 
-func (router *Router) Patch(path string, h xrest.Handler) {
-	router.handle(PATCH, path, h)
+func (r *Router) Post(path string, h xrest.Handler) {
+	r.handle(nil, POST, path, h)
+}
+
+func (r *Router) Put(path string, h xrest.Handler) {
+	r.handle(nil, PUT, path, h)
+}
+
+func (r *Router) Patch(path string, h xrest.Handler) {
+	r.handle(nil, PATCH, path, h)
+}
+
+func (r *Router) SubRouter(pre *SubRouter, prefix string) *SubRouter {
+	prefix = filepath.Join("/", prefix)
+
+	var plugs []xrest.Plugger
+	if pre != nil {
+		prefix = filepath.Join(pre.prefix, prefix)
+		plugs = r.subs[pre.prefix].Plugs()
+	}
+	sub := &SubRouter{
+		prefix: filepath.Join("/", prefix),
+		father: r,
+	}
+
+	r.subs[sub.prefix] = xrest.NewPipeline().Plug(plugs...)
+	return sub
 }

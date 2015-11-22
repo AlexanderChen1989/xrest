@@ -7,12 +7,12 @@ import (
 )
 
 type Pipeline struct {
-	handle HandleFunc
-	plugs  []Plugger
+	handler Handler
+	plugs   []Plugger
 }
 
-func (p *Pipeline) Handler() http.Handler {
-	var h Handler = p.handle
+func (p *Pipeline) HTTPHandler() http.Handler {
+	var h Handler = p.handler
 	for i := len(p.plugs) - 1; i >= 0; i-- {
 		h = p.plugs[i].Plug(h)
 	}
@@ -22,14 +22,30 @@ func (p *Pipeline) Handler() http.Handler {
 	})
 }
 
-func (p *Pipeline) Plug(plugs ...Plugger) {
-	p.plugs = append(p.plugs, plugs...)
+func (p *Pipeline) Handler() Handler {
+	var h Handler = p.handler
+	for i := len(p.plugs) - 1; i >= 0; i-- {
+		h = p.plugs[i].Plug(h)
+	}
+	return h
 }
 
-func emptyHandleFunc(context.Context, http.ResponseWriter, *http.Request) {}
+func (p *Pipeline) Plug(plugs ...Plugger) *Pipeline {
+	p.plugs = append(p.plugs, plugs...)
+	return p
+}
+
+func (p *Pipeline) Plugs() []Plugger {
+	return p.plugs
+}
+
+func (p *Pipeline) SetHandler(h Handler) *Pipeline {
+	p.handler = h
+	return p
+}
 
 func NewPipeline() *Pipeline {
 	return &Pipeline{
-		handle: emptyHandleFunc,
+		handler: HandleFunc(func(context.Context, http.ResponseWriter, *http.Request) {}),
 	}
 }

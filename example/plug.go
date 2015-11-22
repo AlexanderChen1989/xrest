@@ -17,6 +17,6 @@ func main() {
 	}))
 
 	start := time.Now()
-	p.Handler().ServeHTTP(nil, nil)
+	p.HTTPHandler().ServeHTTP(nil, nil)
 	fmt.Println(time.Now().Sub(start))
 }
