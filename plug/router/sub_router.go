@@ -8,15 +8,18 @@ type SubRouter struct {
 	father   *Router
 }
 
-func (r *SubRouter) SubRouter(prefix string) *SubRouter {
-	return r.father.SubRouter(r, prefix)
+func (sr *SubRouter) SubRouter(prefix string) *SubRouter {
+	sub := sr.father.SubRouter(sr, prefix)
+	return sub
 }
 
 func (sr *SubRouter) handle(method string, path string, h xrest.Handler) {
 	sr.father.handle(sr, method, path, h)
 }
 
-func (sr *SubRouter) Plug(plug xrest.Plugger) {
+func (sr *SubRouter) Plug(plug xrest.Plugger) *SubRouter {
+	sr.father.plug(sr, plug)
+	return sr
 }
 
 func (sr *SubRouter) Get(path string, h xrest.Handler) {

@@ -1,6 +1,7 @@
 package hello
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/AlexanderChen1989/xrest"
@@ -14,6 +15,7 @@ type HelloHandler struct {
 }
 
 func (hello *HelloHandler) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Hello, ", hello.name, "!")
 	hello.next.ServeHTTP(ctx, w, r)
 }
 

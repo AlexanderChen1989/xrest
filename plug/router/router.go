@@ -1,7 +1,10 @@
 package router
 
 import (
+	"net/http"
 	"path/filepath"
+
+	"golang.org/x/net/context"
 
 	"github.com/AlexanderChen1989/xrest"
 )
@@ -15,8 +18,9 @@ const (
 
 type Router struct {
 	methodMap map[string]map[string]xrest.Handler
+	subs      map[string]*xrest.Pipeline
 
-	subs map[string]*xrest.Pipeline
+	NotFound xrest.HandleFunc
 }
 
 func NewRouter() *Router {
@@ -32,7 +36,28 @@ func NewRouter() *Router {
 	return &Router{
 		methodMap: mm,
 		subs:      subs,
+		NotFound: xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+			http.Error(w, "Not found.", http.StatusNotFound)
+		}),
 	}
+}
+
+func (r *Router) Plug(_ xrest.Handler) xrest.Handler {
+	return r
+}
+
+func (r *Router) plug(sub *SubRouter, plug xrest.Plugger) {
+	r.subs[sub.prefix].Plug(plug)
+}
+
+func (r *Router) ServeHTTP(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+	if m := r.methodMap[req.Method]; m != nil {
+		if h := m[req.URL.Path]; h != nil {
+			h.ServeHTTP(ctx, w, req)
+			return
+		}
+	}
+	r.NotFound(ctx, w, req)
 }
 
 type Route struct {
