@@ -12,11 +12,8 @@ import (
 )
 
 func TestRouter(t *testing.T) {
-	pipe := xrest.NewPipeline()
 
 	router := NewRouter()
-
-	pipe.Plug(router)
 
 	sr := router.SubRouter(nil, "/api")
 
@@ -37,6 +34,9 @@ func TestRouter(t *testing.T) {
 
 	authReq, _ := http.NewRequest("GET", "/api/auth/files", nil)
 	noauthReq, _ := http.NewRequest("POST", "/api/noauth/login", nil)
+
+	pipe := xrest.NewPipeline().Plug(router)
+
 	pipe.HTTPHandler().ServeHTTP(nil, authReq)
 	pipe.HTTPHandler().ServeHTTP(nil, noauthReq)
 }
