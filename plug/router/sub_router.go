@@ -17,8 +17,8 @@ func (sr *SubRouter) handle(method string, path string, h xrest.Handler) {
 	sr.father.handle(sr, method, path, h)
 }
 
-func (sr *SubRouter) Plug(plug xrest.Plugger) *SubRouter {
-	sr.father.plug(sr, plug)
+func (sr *SubRouter) Plug(plug ...xrest.Plugger) *SubRouter {
+	sr.father.plug(sr, plug...)
 	return sr
 }
 

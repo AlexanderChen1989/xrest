@@ -46,8 +46,8 @@ func (r *Router) Plug(_ xrest.Handler) xrest.Handler {
 	return r
 }
 
-func (r *Router) plug(sub *SubRouter, plug xrest.Plugger) {
-	r.subs[sub.prefix].Plug(plug)
+func (r *Router) plug(sub *SubRouter, plug ...xrest.Plugger) {
+	r.subs[sub.prefix].Plug(plug...)
 }
 
 func (r *Router) ServeHTTP(ctx context.Context, w http.ResponseWriter, req *http.Request) {
