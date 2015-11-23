@@ -172,8 +172,6 @@ func (r *Router) SubRouter(prefix string) *SubRouter {
 }
 
 func (r *Router) subRouter(pre *SubRouter, prefix string) *SubRouter {
-	prefix = filepath.Join("/", prefix)
-
 	var plugs []xrest.Plugger
 	if pre != nil {
 		prefix = filepath.Join(pre.prefix, prefix)
