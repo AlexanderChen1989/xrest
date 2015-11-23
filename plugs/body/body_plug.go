@@ -46,6 +46,16 @@ func (rc *readCloser) Close() error {
 
 var ErrPlugNotPlugged = errors.New("DecodeJSON not plugged.")
 
+func (bp *bodyPlug) Body(ctx context.Context) ([]byte, error) {
+	data, ok := ctx.Value(&ctxBodyKey).([]byte)
+
+	if !ok {
+		return nil, ErrPlugNotPlugged
+	}
+
+	return data, nil
+}
+
 func (bp *bodyPlug) DecodeJSON(ctx context.Context, r *http.Request, v interface{}) error {
 	// fetch a buf from pool
 	data, ok := ctx.Value(&ctxBodyKey).([]byte)
