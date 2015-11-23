@@ -7,7 +7,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/AlexanderChen1989/xrest"
-	"github.com/AlexanderChen1989/xrest/plug/router/tree"
+	"github.com/AlexanderChen1989/xrest/plugs/router/tree"
 )
 
 const (

@@ -9,7 +9,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/AlexanderChen1989/xrest"
-	"github.com/AlexanderChen1989/xrest/plug/hello"
+	"github.com/AlexanderChen1989/xrest/plugs/hello"
 )
 
 func TestRouter(t *testing.T) {
