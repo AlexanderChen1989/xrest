@@ -179,6 +179,7 @@ func (r *Router) subRouter(pre *SubRouter, prefix string) *SubRouter {
 		prefix = filepath.Join(pre.prefix, prefix)
 		plugs = r.subs[pre.prefix].Plugs()
 	}
+
 	sub := &SubRouter{
 		prefix: filepath.Join("/", prefix),
 		father: r,

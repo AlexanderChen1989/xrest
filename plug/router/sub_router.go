@@ -22,25 +22,25 @@ func (sr *SubRouter) Plug(plug ...xrest.Plugger) *SubRouter {
 }
 
 func (sr *SubRouter) Get(path string, h xrest.Handler) {
-	sr.father.Get(path, h)
+	sr.handle(GET, path, h)
 }
 
 func (sr *SubRouter) Post(path string, h xrest.Handler) {
-	sr.father.Post(path, h)
+	sr.handle(POST, path, h)
 }
 
 func (sr *SubRouter) Put(path string, h xrest.Handler) {
-	sr.father.Put(path, h)
+	sr.handle(PUT, path, h)
 }
 
 func (sr *SubRouter) Patch(path string, h xrest.Handler) {
-	sr.father.Patch(path, h)
+	sr.handle(PATCH, path, h)
 }
 
 func (sr *SubRouter) Options(path string, h xrest.Handler) {
-	sr.father.Options(path, h)
+	sr.handle(OPTIONS, path, h)
 }
 
 func (sr *SubRouter) Delete(path string, h xrest.Handler) {
-	sr.father.Delete(path, h)
+	sr.handle(DELETE, path, h)
 }
