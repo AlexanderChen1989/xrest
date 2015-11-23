@@ -447,7 +447,7 @@ walk: // Outer loop for walking the tree
 // It can optionally also fix trailing slashes.
 // It returns the case-corrected path and a bool indicating whether the lookup
 // was successful.
-func (n *Node) findCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPath []byte, found bool) {
+func (n *Node) FindCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPath []byte, found bool) {
 	ciPath = make([]byte, 0, len(path)+1) // preallocate enough memory
 
 	// Outer loop for walking the tree
@@ -465,7 +465,7 @@ func (n *Node) findCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPa
 					// must use recursive approach since both index and
 					// ToLower(index) could exist. We must check both.
 					if r == unicode.ToLower(index) {
-						out, found := n.children[i].findCaseInsensitivePath(path, fixTrailingSlash)
+						out, found := n.children[i].FindCaseInsensitivePath(path, fixTrailingSlash)
 						if found {
 							return append(ciPath, out...), true
 						}

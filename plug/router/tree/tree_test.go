@@ -519,7 +519,7 @@ func TestTreeFindCaseInsensitivePath(t *testing.T) {
 	// Check out == in for all registered routes
 	// With fixTrailingSlash = true
 	for _, route := range routes {
-		out, found := tree.findCaseInsensitivePath(route, true)
+		out, found := tree.FindCaseInsensitivePath(route, true)
 		if !found {
 			t.Errorf("Route '%s' not found!", route)
 		} else if string(out) != route {
@@ -528,7 +528,7 @@ func TestTreeFindCaseInsensitivePath(t *testing.T) {
 	}
 	// With fixTrailingSlash = false
 	for _, route := range routes {
-		out, found := tree.findCaseInsensitivePath(route, false)
+		out, found := tree.FindCaseInsensitivePath(route, false)
 		if !found {
 			t.Errorf("Route '%s' not found!", route)
 		} else if string(out) != route {
@@ -586,7 +586,7 @@ func TestTreeFindCaseInsensitivePath(t *testing.T) {
 	}
 	// With fixTrailingSlash = true
 	for _, test := range tests {
-		out, found := tree.findCaseInsensitivePath(test.in, true)
+		out, found := tree.FindCaseInsensitivePath(test.in, true)
 		if found != test.found || (found && (string(out) != test.out)) {
 			t.Errorf("Wrong result for '%s': got %s, %t; want %s, %t",
 				test.in, string(out), found, test.out, test.found)
@@ -595,7 +595,7 @@ func TestTreeFindCaseInsensitivePath(t *testing.T) {
 	}
 	// With fixTrailingSlash = false
 	for _, test := range tests {
-		out, found := tree.findCaseInsensitivePath(test.in, false)
+		out, found := tree.FindCaseInsensitivePath(test.in, false)
 		if test.slash {
 			if found { // test needs a trailingSlash fix. It must not be found!
 				t.Errorf("Found without fixTrailingSlash: %s; got %s", test.in, string(out))
@@ -630,7 +630,7 @@ func TestTreeInvalidNodeType(t *testing.T) {
 
 	// case-insensitive lookup
 	recv = catchPanic(func() {
-		tree.findCaseInsensitivePath("/test", true)
+		tree.FindCaseInsensitivePath("/test", true)
 	})
 	if rs, ok := recv.(string); !ok || rs != panicMsg {
 		t.Fatalf("Expected panic '"+panicMsg+"', got '%v'", recv)
