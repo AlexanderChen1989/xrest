@@ -44,13 +44,13 @@ func (rc *readCloser) Close() error {
 	return rc.ReadCloser.Close()
 }
 
-var ErrPlugNotPlugged = errors.New("DecodeJSON not plugged.")
+var ErrBodyNotPlugged = errors.New("Body not plugged.")
 
 func (bp *bodyPlug) Body(ctx context.Context) ([]byte, error) {
 	data, ok := ctx.Value(&ctxBodyKey).([]byte)
 
 	if !ok {
-		return nil, ErrPlugNotPlugged
+		return nil, ErrBodyNotPlugged
 	}
 
 	return data, nil
@@ -61,7 +61,7 @@ func (bp *bodyPlug) DecodeJSON(ctx context.Context, r *http.Request, v interface
 	data, ok := ctx.Value(&ctxBodyKey).([]byte)
 
 	if !ok {
-		return ErrPlugNotPlugged
+		return ErrBodyNotPlugged
 	}
 
 	return json.Unmarshal(data, v)
