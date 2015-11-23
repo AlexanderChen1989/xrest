@@ -9,8 +9,7 @@ type SubRouter struct {
 }
 
 func (sr *SubRouter) SubRouter(prefix string) *SubRouter {
-	sub := sr.father.subRouter(sr, prefix)
-	return sub
+	return sr.father.subRouter(sr, prefix)
 }
 
 func (sr *SubRouter) handle(method string, path string, h xrest.Handler) {
@@ -23,17 +22,25 @@ func (sr *SubRouter) Plug(plug ...xrest.Plugger) *SubRouter {
 }
 
 func (sr *SubRouter) Get(path string, h xrest.Handler) {
-	sr.handle(GET, path, h)
+	sr.father.Get(path, h)
 }
 
 func (sr *SubRouter) Post(path string, h xrest.Handler) {
-	sr.handle(POST, path, h)
+	sr.father.Post(path, h)
 }
 
 func (sr *SubRouter) Put(path string, h xrest.Handler) {
-	sr.handle(PUT, path, h)
+	sr.father.Put(path, h)
 }
 
 func (sr *SubRouter) Patch(path string, h xrest.Handler) {
-	sr.handle(PATCH, path, h)
+	sr.father.Patch(path, h)
+}
+
+func (sr *SubRouter) Options(path string, h xrest.Handler) {
+	sr.father.Options(path, h)
+}
+
+func (sr *SubRouter) Delete(path string, h xrest.Handler) {
+	sr.father.Delete(path, h)
 }

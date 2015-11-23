@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"golang.org/x/net/context"
@@ -37,6 +38,8 @@ func TestRouter(t *testing.T) {
 
 	pipe := xrest.NewPipeline().Plug(router)
 
-	pipe.HTTPHandler().ServeHTTP(nil, authReq)
-	pipe.HTTPHandler().ServeHTTP(nil, noauthReq)
+	w := httptest.NewRecorder()
+
+	pipe.HTTPHandler().ServeHTTP(w, authReq)
+	pipe.HTTPHandler().ServeHTTP(w, noauthReq)
 }
