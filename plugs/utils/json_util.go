@@ -49,7 +49,8 @@ func (bs *bodyStore) DecodeJSON(ctx context.Context, r *http.Request, v interfac
 		buf := bs.pool.Get().(*bytes.Buffer)
 		buf.Reset()
 		if _, err := io.Copy(buf, r.Body); err != nil {
-			return nil, err
+			bs.pool.Put(buf)
+			return ctx, err
 		}
 		data = buf.Bytes()
 		ctx = context.WithValue(ctx, &ctxBodyKey, data)
