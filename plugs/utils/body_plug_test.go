@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/AlexanderChen1989/xrest"
-	"github.com/AlexanderChen1989/xrest/plugs/utils"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 )
@@ -30,8 +29,7 @@ func newTestPlug(t *testing.T, origin testPayload) *testPlug {
 
 func (tp *testPlug) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	var payload testPayload
-	var err error
-	ctx, err = utils.DecodeJSON(ctx, r, &payload)
+	err := DecodeJSON(ctx, r, &payload)
 	assert.Nil(tp.t, err)
 	assert.True(tp.t, reflect.DeepEqual(tp.origin, payload))
 	tp.next.ServeHTTP(ctx, w, r)
@@ -49,6 +47,7 @@ func TestJSONDecodeIntegration(t *testing.T) {
 		Age:  27,
 	}
 	pipe.Plug(
+		DefaultBodyPlug,
 		newTestPlug(t, origin),
 		newTestPlug(t, origin),
 		newTestPlug(t, origin),
