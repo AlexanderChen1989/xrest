@@ -32,7 +32,9 @@ func NewBodyStore() *bodyStore {
 	}
 }
 
-var _ = NewBodyStore()
+var defaultBodyStore = NewBodyStore()
+
+var DecodeJSON = defaultBodyStore.DecodeJSON
 
 func (rc *readCloser) Close() error {
 	rc.bs.pool.Put(rc.buf)
