@@ -1,4 +1,4 @@
-package utils
+package body
 
 import (
 	"bytes"
@@ -24,7 +24,7 @@ type readCloser struct {
 	buf *bytes.Buffer
 }
 
-func NewBodyPlug() *bodyPlug {
+func newBodyPlug() *bodyPlug {
 	return &bodyPlug{
 		pool: &sync.Pool{
 			New: func() interface{} {
@@ -34,9 +34,9 @@ func NewBodyPlug() *bodyPlug {
 	}
 }
 
-var DefaultBodyPlug = NewBodyPlug()
+var DefaultPlug = newBodyPlug()
 
-var DecodeJSON = DefaultBodyPlug.DecodeJSON
+var DecodeJSON = DefaultPlug.DecodeJSON
 
 func (rc *readCloser) Close() error {
 	rc.bp.pool.Put(rc.buf)

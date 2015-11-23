@@ -1,4 +1,4 @@
-package utils
+package body
 
 import (
 	"bytes"
@@ -47,7 +47,7 @@ func TestJSONDecodeIntegration(t *testing.T) {
 		Age:  27,
 	}
 	pipe.Plug(
-		DefaultBodyPlug,
+		DefaultPlug,
 		newTestPlug(t, origin),
 		newTestPlug(t, origin),
 		newTestPlug(t, origin),
