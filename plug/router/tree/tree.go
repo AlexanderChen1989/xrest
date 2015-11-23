@@ -78,9 +78,9 @@ func (n *node) incrementChildPrio(pos int) int {
 	return newPos
 }
 
-// addRoute adds a node with the given handle to the path.
+// AddRoute adds a node with the given handle to the path.
 // Not concurrency-safe!
-func (n *node) addRoute(path string, handle xrest.Handler) {
+func (n *node) AddRoute(path string, handle xrest.Handler) {
 	fullPath := path
 	n.priority++
 	numParams := countParams(path)
@@ -315,12 +315,12 @@ func (n *node) insertChild(numParams uint8, path, fullPath string, handle xrest.
 	n.handle = handle
 }
 
-// Returns the handle registered with the given path (key). The values of
+// GetValue Returns the handle registered with the given path (key). The values of
 // wildcards are saved to a map.
 // If no handle can be found, a TSR (trailing slash redirect) recommendation is
 // made if a handle exists with an extra (without the) trailing slash for the
 // given path.
-func (n *node) getValue(path string) (handle xrest.Handler, p Params, tsr bool) {
+func (n *node) GetValue(path string) (handle xrest.Handler, p Params, tsr bool) {
 walk: // Outer loop for walking the tree
 	for {
 		if len(path) > len(n.path) {
