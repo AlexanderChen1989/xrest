@@ -41,19 +41,19 @@ const (
 	catchAll
 )
 
-type node struct {
+type Node struct {
 	path      string
 	wildChild bool
 	nType     nodeType
 	maxParams uint8
 	indices   string
-	children  []*node
+	children  []*Node
 	handle    xrest.Handler
 	priority  uint32
 }
 
 // increments priority of the given child and reorders if necessary
-func (n *node) incrementChildPrio(pos int) int {
+func (n *Node) incrementChildPrio(pos int) int {
 	n.children[pos].priority++
 	prio := n.children[pos].priority
 
@@ -80,7 +80,7 @@ func (n *node) incrementChildPrio(pos int) int {
 
 // AddRoute adds a node with the given handle to the path.
 // Not concurrency-safe!
-func (n *node) AddRoute(path string, handle xrest.Handler) {
+func (n *Node) AddRoute(path string, handle xrest.Handler) {
 	fullPath := path
 	n.priority++
 	numParams := countParams(path)
@@ -105,7 +105,7 @@ func (n *node) AddRoute(path string, handle xrest.Handler) {
 
 			// Split edge
 			if i < len(n.path) {
-				child := node{
+				child := Node{
 					path:      n.path[i:],
 					wildChild: n.wildChild,
 					indices:   n.indices,
@@ -121,7 +121,7 @@ func (n *node) AddRoute(path string, handle xrest.Handler) {
 					}
 				}
 
-				n.children = []*node{&child}
+				n.children = []*Node{&child}
 				// []byte for proper unicode char conversion, see #65
 				n.indices = string([]byte{n.path[i]})
 				n.path = path[:i]
@@ -178,7 +178,7 @@ func (n *node) AddRoute(path string, handle xrest.Handler) {
 				if c != ':' && c != '*' {
 					// []byte for proper unicode char conversion, see #65
 					n.indices += string([]byte{c})
-					child := &node{
+					child := &Node{
 						maxParams: numParams,
 					}
 					n.children = append(n.children, child)
@@ -202,7 +202,7 @@ func (n *node) AddRoute(path string, handle xrest.Handler) {
 	}
 }
 
-func (n *node) insertChild(numParams uint8, path, fullPath string, handle xrest.Handler) {
+func (n *Node) insertChild(numParams uint8, path, fullPath string, handle xrest.Handler) {
 	var offset int // already handled bytes of the path
 
 	// find prefix until first wildcard (beginning with ':'' or '*'')
@@ -244,11 +244,11 @@ func (n *node) insertChild(numParams uint8, path, fullPath string, handle xrest.
 				offset = i
 			}
 
-			child := &node{
+			child := &Node{
 				nType:     param,
 				maxParams: numParams,
 			}
-			n.children = []*node{child}
+			n.children = []*Node{child}
 			n.wildChild = true
 			n = child
 			n.priority++
@@ -260,11 +260,11 @@ func (n *node) insertChild(numParams uint8, path, fullPath string, handle xrest.
 				n.path = path[offset:end]
 				offset = end
 
-				child := &node{
+				child := &Node{
 					maxParams: numParams,
 					priority:  1,
 				}
-				n.children = []*node{child}
+				n.children = []*Node{child}
 				n = child
 			}
 
@@ -286,25 +286,25 @@ func (n *node) insertChild(numParams uint8, path, fullPath string, handle xrest.
 			n.path = path[offset:i]
 
 			// first node: catchAll node with empty path
-			child := &node{
+			child := &Node{
 				wildChild: true,
 				nType:     catchAll,
 				maxParams: 1,
 			}
-			n.children = []*node{child}
+			n.children = []*Node{child}
 			n.indices = string(path[i])
 			n = child
 			n.priority++
 
 			// second node: node holding the variable
-			child = &node{
+			child = &Node{
 				path:      path[i:],
 				nType:     catchAll,
 				maxParams: 1,
 				handle:    handle,
 				priority:  1,
 			}
-			n.children = []*node{child}
+			n.children = []*Node{child}
 
 			return
 		}
@@ -320,7 +320,7 @@ func (n *node) insertChild(numParams uint8, path, fullPath string, handle xrest.
 // If no handle can be found, a TSR (trailing slash redirect) recommendation is
 // made if a handle exists with an extra (without the) trailing slash for the
 // given path.
-func (n *node) GetValue(path string) (handle xrest.Handler, p Params, tsr bool) {
+func (n *Node) GetValue(path string) (handle xrest.Handler, p Params, tsr bool) {
 walk: // Outer loop for walking the tree
 	for {
 		if len(path) > len(n.path) {
@@ -447,7 +447,7 @@ walk: // Outer loop for walking the tree
 // It can optionally also fix trailing slashes.
 // It returns the case-corrected path and a bool indicating whether the lookup
 // was successful.
-func (n *node) findCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPath []byte, found bool) {
+func (n *Node) findCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPath []byte, found bool) {
 	ciPath = make([]byte, 0, len(path)+1) // preallocate enough memory
 
 	// Outer loop for walking the tree
