@@ -39,6 +39,7 @@ var DefaultPlug = newBodyPlug()
 var DecodeJSON = DefaultPlug.DecodeJSON
 var Body = DefaultPlug.Body
 
+// Close return buf to pool
 func (rc *readCloser) Close() error {
 	rc.bp.pool.Put(rc.buf)
 
