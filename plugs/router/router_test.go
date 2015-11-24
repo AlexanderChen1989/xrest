@@ -14,7 +14,7 @@ import (
 
 func TestRouter(t *testing.T) {
 
-	router := NewRouter()
+	router := New()
 
 	sr := router.SubRouter("/api")
 

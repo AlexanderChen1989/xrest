@@ -31,7 +31,7 @@ type Router struct {
 	NotFound         xrest.Handler
 }
 
-func NewRouter() *Router {
+func New() *Router {
 	return &Router{
 		trees: map[string]*tree.Node{},
 		subs:  map[string]*xrest.Pipeline{},
