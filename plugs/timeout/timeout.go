@@ -20,7 +20,7 @@ func New(d time.Duration) *Timeout {
 	return &Timeout{Duration: d}
 }
 
-// Plug implements Plugger interface
+// Plug implements xrest.Plugger interface
 func (to *Timeout) Plug(h xrest.Handler) xrest.Handler {
 	to.next = h
 	return to
@@ -29,7 +29,9 @@ func (to *Timeout) Plug(h xrest.Handler) xrest.Handler {
 // ServeHTTP implements xrest.Handler interface
 func (to *Timeout) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if to.Duration > 0 {
-		ctx, _ = context.WithTimeout(ctx, to.Duration)
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, to.Duration)
+		defer cancel()
 	}
 	to.next.ServeHTTP(ctx, w, r)
 }
