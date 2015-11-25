@@ -59,7 +59,6 @@ func (bp *bodyPlug) Body(ctx context.Context) ([]byte, error) {
 }
 
 func (bp *bodyPlug) DecodeJSON(ctx context.Context, r *http.Request, v interface{}) error {
-	// fetch a buf from pool
 	data, ok := ctx.Value(&ctxBodyKey).([]byte)
 
 	if !ok {
