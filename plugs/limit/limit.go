@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/AlexanderChen1989/xrest"
-	"github.com/AlexanderChen1989/xrest/plugs"
 	"github.com/didip/tollbooth"
 	"github.com/didip/tollbooth/config"
 	"github.com/didip/tollbooth/errors"
@@ -22,7 +21,7 @@ type Limiter struct {
 }
 
 func errHandleFn(w http.ResponseWriter, err *errors.HTTPError) {
-	plugs.WriteJSON(w, err.StatusCode, map[string]interface{}{
+	xrest.WriteJSON(w, err.StatusCode, map[string]interface{}{
 		"status": "error",
 		"msg":    err.Message,
 	})

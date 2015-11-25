@@ -1,4 +1,4 @@
-package plugs
+package xrest
 
 import (
 	"encoding/json"
