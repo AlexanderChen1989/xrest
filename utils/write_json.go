@@ -1,4 +1,4 @@
-package xrest
+package utils
 
 import (
 	"encoding/json"
