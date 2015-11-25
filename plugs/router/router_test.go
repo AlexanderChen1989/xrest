@@ -1,16 +1,40 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"golang.org/x/net/context"
 
 	"github.com/AlexanderChen1989/xrest"
-	"github.com/AlexanderChen1989/xrest/plugs/hello"
+	"github.com/stretchr/testify/assert"
 )
+
+type testPlug struct {
+	name string
+	next xrest.Handler
+}
+
+func newTestPlug(name string) *testPlug {
+	return &testPlug{name: name}
+}
+
+func (plug *testPlug) Plug(h xrest.Handler) xrest.Handler {
+	plug.next = h
+	return plug
+}
+
+var ctxTestPlug uint8
+
+func (plug *testPlug) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	vals, ok := ctx.Value(&ctxTestPlug).([]string)
+	if !ok {
+		vals = []string{}
+	}
+	vals = append(vals, plug.name)
+	ctx = context.WithValue(ctx, &ctxTestPlug, vals)
+	plug.next.ServeHTTP(ctx, w, r)
+}
 
 func TestRouter(t *testing.T) {
 
@@ -21,16 +45,21 @@ func TestRouter(t *testing.T) {
 	auth := sr.SubRouter("/auth")
 	noauth := sr.SubRouter("/noauth")
 
-	auth.Plug(hello.NewHelloHandler("Hello1"))
-	auth.Plug(hello.NewHelloHandler("Hello2"))
-	noauth.Plug(hello.NewHelloHandler("World1"))
-	noauth.Plug(hello.NewHelloHandler("World2"))
+	authVals := []string{"Hello1", "Hello2", "Hello3"}
+	for _, val := range authVals {
+		auth.Plug(newTestPlug(val))
+	}
+
+	noauthVals := []string{"World1", "World2", "World3"}
+	for _, val := range noauthVals {
+		noauth.Plug(newTestPlug(val))
+	}
 
 	auth.Get("/files", xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Auth files Done!")
+		assert.EqualValues(t, authVals, ctx.Value(&ctxTestPlug))
 	}))
 	noauth.Post("/login", xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Notauth login Done!")
+		assert.EqualValues(t, noauthVals, ctx.Value(&ctxTestPlug))
 	}))
 
 	authReq, _ := http.NewRequest("GET", "/api/auth/files", nil)
@@ -38,8 +67,6 @@ func TestRouter(t *testing.T) {
 
 	pipe := xrest.NewPipeline().Plug(router)
 
-	w := httptest.NewRecorder()
-
-	pipe.HTTPHandler().ServeHTTP(w, authReq)
-	pipe.HTTPHandler().ServeHTTP(w, noauthReq)
+	pipe.HTTPHandler().ServeHTTP(nil, authReq)
+	pipe.HTTPHandler().ServeHTTP(nil, noauthReq)
 }
