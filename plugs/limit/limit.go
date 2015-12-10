@@ -13,7 +13,7 @@ import (
 )
 
 // Limiter cancel context when timeout
-type Limiter struct {
+type limiter struct {
 	limiter *config.Limiter
 
 	ErrHandleFn func(http.ResponseWriter, *errors.HTTPError)
@@ -29,23 +29,23 @@ func errHandleFn(w http.ResponseWriter, err *errors.HTTPError) {
 }
 
 // New create a new request rate limiter plug, max requests in ttl time duration
-func New(max int64, ttl time.Duration) *Limiter {
-	return &Limiter{
+func New(max int64, ttl time.Duration) xrest.Plugger {
+	return &limiter{
 		limiter:     tollbooth.NewLimiter(max, ttl),
 		ErrHandleFn: errHandleFn,
 	}
 }
 
 // NewLimiter create a new request rate limiter with conf and error handle function
-func NewLimiter(conf *config.Limiter, handlefn func(http.ResponseWriter, *errors.HTTPError)) *Limiter {
-	return &Limiter{
+func NewLimiter(conf *config.Limiter, handlefn func(http.ResponseWriter, *errors.HTTPError)) xrest.Plugger {
+	return &limiter{
 		limiter:     conf,
 		ErrHandleFn: handlefn,
 	}
 }
 
 // ServeHTTP implement Handler.ServeHTTP
-func (limiter *Limiter) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (limiter *limiter) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	err := tollbooth.LimitByRequest(limiter.limiter, r)
 	if err != nil {
 		limiter.ErrHandleFn(w, err)
@@ -57,7 +57,7 @@ func (limiter *Limiter) ServeHTTP(ctx context.Context, w http.ResponseWriter, r 
 }
 
 // Plug implement Plugger.Plug
-func (limiter *Limiter) Plug(h xrest.Handler) xrest.Handler {
+func (limiter *limiter) Plug(h xrest.Handler) xrest.Handler {
 	limiter.next = h
 	return limiter
 }
