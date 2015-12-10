@@ -24,7 +24,7 @@ type readCloser struct {
 	buf *bytes.Buffer
 }
 
-func newBodyPlug() *bodyPlug {
+func newBody() *bodyPlug {
 	return &bodyPlug{
 		pool: &sync.Pool{
 			New: func() interface{} {
@@ -34,11 +34,9 @@ func newBodyPlug() *bodyPlug {
 	}
 }
 
-// Default default plug to use
-var Default = newBodyPlug()
-
-// DecodeJSON decode json from body
-var DecodeJSON = Default.DecodeJSON
+func New() xrest.Plugger {
+	return newBody()
+}
 
 // Close return buf to pool
 func (rc *readCloser) Close() error {
@@ -50,7 +48,10 @@ func (rc *readCloser) Close() error {
 // ErrBodyNotPlugged body plug not plugged
 var ErrBodyNotPlugged = errors.New("Body not plugged.")
 
-func (bp *bodyPlug) DecodeJSON(ctx context.Context, r *http.Request, v interface{}) error {
+var ctxBodyKey uint8
+
+// DecodeJSON decode json to interface from body
+func DecodeJSON(ctx context.Context, v interface{}) error {
 	data, ok := ctx.Value(&ctxBodyKey).([]byte)
 
 	if !ok {
@@ -60,16 +61,14 @@ func (bp *bodyPlug) DecodeJSON(ctx context.Context, r *http.Request, v interface
 	return json.Unmarshal(data, v)
 }
 
-var ctxBodyKey uint8
+func FetchBody(ctx context.Context) ([]byte, bool) {
+	body, ok := ctx.Value(&ctxBodyKey).([]byte)
+	return body, ok
+}
 
 func (bp *bodyPlug) Plug(h xrest.Handler) xrest.Handler {
 	bp.next = h
 	return bp
-}
-
-func FetchBody(ctx context.Context) ([]byte, bool) {
-	body, ok := ctx.Value(&ctxBodyKey).([]byte)
-	return body, ok
 }
 
 func (bp *bodyPlug) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {

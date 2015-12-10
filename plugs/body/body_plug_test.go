@@ -29,7 +29,7 @@ func newTestPlug(t *testing.T, origin testPayload) *testPlug {
 
 func (tp *testPlug) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	var payload testPayload
-	err := DecodeJSON(ctx, r, &payload)
+	err := DecodeJSON(ctx, &payload)
 	assert.Nil(tp.t, err)
 	assert.True(tp.t, reflect.DeepEqual(tp.origin, payload))
 	tp.next.ServeHTTP(ctx, w, r)
@@ -47,7 +47,7 @@ func TestJSONDecodeIntegration(t *testing.T) {
 		Age:  27,
 	}
 	pipe.Plug(
-		Default,
+		New(),
 		newTestPlug(t, origin),
 		newTestPlug(t, origin),
 		newTestPlug(t, origin),
