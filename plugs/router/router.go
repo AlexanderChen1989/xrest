@@ -51,7 +51,7 @@ func (r *Router) plug(sub *SubRouter, plug ...xrest.Plugger) {
 
 var ctxParamsKey uint8
 
-func FetchParamsFromCtx(ctx context.Context) (ps tree.Params, ok bool) {
+func FetchParams(ctx context.Context) (ps tree.Params, ok bool) {
 	ps, ok = ctx.Value(&ctxParamsKey).(tree.Params)
 	return
 }

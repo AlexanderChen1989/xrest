@@ -12,7 +12,7 @@ import (
 )
 
 func hello(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	params, _ := router.FetchParamsFromCtx(ctx)
+	params, _ := router.FetchParams(ctx)
 	fmt.Fprintf(w, "Hello, %s!\n", params.ByName("name"))
 }
 

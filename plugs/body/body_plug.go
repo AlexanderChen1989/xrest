@@ -34,11 +34,11 @@ func newBodyPlug() *bodyPlug {
 	}
 }
 
-// Body default plug to use
+// Default default plug to use
 var Default = newBodyPlug()
 
+// DecodeJSON decode json from body
 var DecodeJSON = Default.DecodeJSON
-var Body = Default.Body
 
 // Close return buf to pool
 func (rc *readCloser) Close() error {
@@ -47,17 +47,8 @@ func (rc *readCloser) Close() error {
 	return rc.ReadCloser.Close()
 }
 
+// ErrBodyNotPlugged body plug not plugged
 var ErrBodyNotPlugged = errors.New("Body not plugged.")
-
-func (bp *bodyPlug) Body(ctx context.Context) ([]byte, error) {
-	data, ok := ctx.Value(&ctxBodyKey).([]byte)
-
-	if !ok {
-		return nil, ErrBodyNotPlugged
-	}
-
-	return data, nil
-}
 
 func (bp *bodyPlug) DecodeJSON(ctx context.Context, r *http.Request, v interface{}) error {
 	data, ok := ctx.Value(&ctxBodyKey).([]byte)
@@ -76,13 +67,13 @@ func (bp *bodyPlug) Plug(h xrest.Handler) xrest.Handler {
 	return bp
 }
 
-func FetchBodyFromCtx(ctx context.Context) ([]byte, bool) {
+func FetchBody(ctx context.Context) ([]byte, bool) {
 	body, ok := ctx.Value(&ctxBodyKey).([]byte)
 	return body, ok
 }
 
 func (bp *bodyPlug) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	if _, ok := FetchBodyFromCtx(ctx); !ok {
+	if _, ok := FetchBody(ctx); !ok {
 		buf := bp.pool.Get().(*bytes.Buffer)
 		buf.Reset()
 		if _, err := io.Copy(buf, r.Body); err != nil {
