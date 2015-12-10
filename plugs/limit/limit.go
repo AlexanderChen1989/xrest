@@ -22,7 +22,7 @@ type limiter struct {
 }
 
 func errHandleFn(w http.ResponseWriter, err *errors.HTTPError) {
-	utils.WriteJSON(w, err.StatusCode, map[string]interface{}{
+	utils.JSON.Code(err.StatusCode).Dump(w, map[string]interface{}{
 		"status": "error",
 		"msg":    err.Message,
 	})

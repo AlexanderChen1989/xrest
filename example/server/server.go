@@ -17,9 +17,8 @@ import (
 
 func helloRoute(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	params, _ := router.FetchParams(ctx)
-	utils.WriteJSON(
+	utils.DumpJSON(
 		w,
-		http.StatusOK,
 		map[string]interface{}{
 			"status": "success",
 			"msg":    "Hello, " + params.ByName("name") + "!",
