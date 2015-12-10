@@ -13,19 +13,19 @@ import (
 	"golang.org/x/net/context"
 )
 
-type bodyPlug struct {
+type body struct {
 	pool *sync.Pool
 	next xrest.Handler
 }
 
 type readCloser struct {
 	io.ReadCloser
-	bp  *bodyPlug
+	bp  *body
 	buf *bytes.Buffer
 }
 
-func newBody() *bodyPlug {
-	return &bodyPlug{
+func newBody() *body {
+	return &body{
 		pool: &sync.Pool{
 			New: func() interface{} {
 				return bytes.NewBuffer(nil)
@@ -66,12 +66,12 @@ func FetchBody(ctx context.Context) ([]byte, bool) {
 	return body, ok
 }
 
-func (bp *bodyPlug) Plug(h xrest.Handler) xrest.Handler {
+func (bp *body) Plug(h xrest.Handler) xrest.Handler {
 	bp.next = h
 	return bp
 }
 
-func (bp *bodyPlug) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (bp *body) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if _, ok := FetchBody(ctx); !ok {
 		buf := bp.pool.Get().(*bytes.Buffer)
 		buf.Reset()
