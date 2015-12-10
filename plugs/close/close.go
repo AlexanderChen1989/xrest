@@ -9,23 +9,23 @@ import (
 )
 
 // Closer client connection close plug
-type Closer struct {
+type closer struct {
 	next xrest.Handler
 }
 
 // New create closer plug
-func New() *Closer {
-	return &Closer{}
+func New() xrest.Plugger {
+	return &closer{}
 }
 
 // Plug implements xrest.Plugger interface
-func (c *Closer) Plug(h xrest.Handler) xrest.Handler {
+func (c *closer) Plug(h xrest.Handler) xrest.Handler {
 	c.next = h
 	return c
 }
 
 // ServeHTTP implements xrest.Handler interface
-func (c *Closer) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (c *closer) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	// Cancel the context if the client closes the connection
 	if cn, ok := w.(http.CloseNotifier); ok {
 		var cancel context.CancelFunc
