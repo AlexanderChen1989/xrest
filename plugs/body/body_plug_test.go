@@ -47,7 +47,7 @@ func TestJSONDecodeIntegration(t *testing.T) {
 		Age:  27,
 	}
 	pipe.Plug(
-		DefaultPlug,
+		Default,
 		newTestPlug(t, origin),
 		newTestPlug(t, origin),
 		newTestPlug(t, origin),

@@ -18,7 +18,7 @@ func hello(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	p := xrest.NewPipeline()
-	p.Plug(body.DefaultPlug)
+	p.Plug(body.Default)
 	r := router.New()
 	r.Get("/api/hello/:name", xrest.HandleFunc(hello))
 	p.Plug(r)

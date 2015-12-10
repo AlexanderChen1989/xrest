@@ -34,10 +34,11 @@ func newBodyPlug() *bodyPlug {
 	}
 }
 
-var DefaultPlug = newBodyPlug()
+// Body default plug to use
+var Default = newBodyPlug()
 
-var DecodeJSON = DefaultPlug.DecodeJSON
-var Body = DefaultPlug.Body
+var DecodeJSON = Default.DecodeJSON
+var Body = Default.Body
 
 // Close return buf to pool
 func (rc *readCloser) Close() error {
