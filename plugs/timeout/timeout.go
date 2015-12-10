@@ -8,26 +8,30 @@ import (
 	"golang.org/x/net/context"
 )
 
-// Timeout timeout plug
+// timeout plug
 // if duration <= 0, no timeout
-type Timeout struct {
+type timeout struct {
 	next     xrest.Handler
 	Duration time.Duration
 }
 
 // New create a new timeout plug
-func New(d time.Duration) *Timeout {
-	return &Timeout{Duration: d}
+func New(d time.Duration) xrest.Plugger {
+	return newTimeout(d)
+}
+
+func newTimeout(d time.Duration) *timeout {
+	return &timeout{Duration: d}
 }
 
 // Plug implements xrest.Plugger interface
-func (to *Timeout) Plug(h xrest.Handler) xrest.Handler {
+func (to *timeout) Plug(h xrest.Handler) xrest.Handler {
 	to.next = h
 	return to
 }
 
 // ServeHTTP implements xrest.Handler interface
-func (to *Timeout) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (to *timeout) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if to.Duration > 0 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, to.Duration)

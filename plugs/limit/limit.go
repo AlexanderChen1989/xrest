@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-// Limiter cancel context when timeout
+// limiter cancel context when timeout
 type limiter struct {
 	limiter *config.Limiter
 

@@ -10,7 +10,7 @@ import (
 )
 
 func TestTimeout(t *testing.T) {
-	to := New(1 * time.Second)
+	to := newTimeout(1 * time.Second)
 
 	pipe := xrest.NewPipeline()
 	pipe.Plug(to)
@@ -23,7 +23,7 @@ func TestTimeout(t *testing.T) {
 	}))
 	pipe.HTTPHandler().ServeHTTP(nil, nil)
 
-	to = New(0)
+	to = newTimeout(0)
 	pipe = xrest.NewPipeline()
 	pipe.Plug(to)
 	pipe.Plug(xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
