@@ -22,10 +22,6 @@ type Dumper interface {
 	AddHeader(key, val string) Dumper
 }
 
-func NewDumper() Dumper {
-	return JSON
-}
-
 func (py payloadDumper) Dump(w http.ResponseWriter, payload interface{}) error {
 	for _, h := range py.headers {
 		w.Header().Add(h.key, h.value)
@@ -51,4 +47,5 @@ func (py payloadDumper) AddHeader(key, val string) Dumper {
 }
 
 var JSON = payloadDumper{}.Code(http.StatusOK).ContentType("application/json")
+var Default = JSON
 var DumpJSON = JSON.Dump
