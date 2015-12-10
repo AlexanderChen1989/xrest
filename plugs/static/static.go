@@ -2,6 +2,7 @@ package static
 
 import (
 	"net/http"
+	"path"
 	"strings"
 
 	"github.com/AlexanderChen1989/xrest"
@@ -25,21 +26,22 @@ func Dir(path string) func(*static) {
 }
 
 // Prefix set prefix to url to serve static files
-func Prefix(path string) func(*static) {
+func Prefix(prefix string) func(*static) {
 	return func(s *static) {
-		s.prefix = path
+		s.prefix = path.Join("/", prefix)
 	}
 }
 
 // New create a new static file server
 // Default:
-//  dir -> ./static
-//  prefix -> /public
+//  dir: ./static
+//  prefix: /public
 func New(setups ...func(*static)) xrest.Plugger {
 	s := &static{
 		dir:    "./static",
-		prefix: "public",
+		prefix: "/public",
 	}
+
 	for _, setup := range setups {
 		setup(s)
 	}

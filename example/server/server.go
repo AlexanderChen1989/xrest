@@ -38,7 +38,12 @@ func main() {
 
 	p.Plug(limit.New(1, time.Second))
 	p.Plug(close.New())
-	p.Plug(static.New())
+	p.Plug(
+		static.New(
+			static.Dir("./static"),
+			static.Prefix("public"),
+		),
+	)
 	p.Plug(body.New())
 	p.Plug(newRouter())
 
