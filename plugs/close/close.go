@@ -10,12 +10,13 @@ import (
 
 // Closer client connection close plug
 type closer struct {
-	next xrest.Handler
+	next    xrest.Handler
+	onClose func(r *http.Request)
 }
 
-// New create closer plug
-func New() xrest.Plugger {
-	return &closer{}
+// New create closer plug, optional pass in a onClose func
+func New(onClose func(r *http.Request)) xrest.Plugger {
+	return &closer{onClose: onClose}
 }
 
 // Plug implements xrest.Plugger interface
@@ -34,6 +35,9 @@ func (c *closer) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.R
 		go func() {
 			<-cn.CloseNotify()
 			cancel()
+			if c.onClose != nil {
+				c.onClose(r)
+			}
 		}()
 	}
 

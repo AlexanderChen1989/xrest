@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -26,9 +27,15 @@ func helloRoute(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	)
 }
 
+func slowRoute(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	time.Sleep(10 * time.Second)
+	utils.DumpJSON(w, `Im slow!`)
+}
+
 func newRouter() *router.Router {
 	r := router.New()
 	r.Get("/api/hello/:name", xrest.HandleFunc(helloRoute))
+	r.Get("/api/slow", xrest.HandleFunc(slowRoute))
 	return r
 }
 
@@ -36,7 +43,9 @@ func main() {
 	p := xrest.NewPipeline()
 
 	p.Plug(limit.New(1, time.Second))
-	p.Plug(close.New())
+	p.Plug(close.New(func(r *http.Request) {
+		fmt.Printf("CLOSED: %#v\n", r.RemoteAddr)
+	}))
 	p.Plug(
 		static.New(
 			static.Dir("./static"),
