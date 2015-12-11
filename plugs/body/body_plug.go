@@ -26,14 +26,13 @@ func newBody(onError func(r *http.Request, err error)) *body {
 	return &body{onError: onError}
 }
 
+// New create new body plug
 func New(onError func(r *http.Request, err error)) xrest.Plugger {
 	return newBody(onError)
 }
 
 // ErrBodyNotPlugged body plug not plugged
-var ErrBodyNotPlugged = errors.New("Body not plugged.")
-
-var ctxBodyKey uint8
+var ErrBodyNotPlugged = errors.New("body not plugged")
 
 // DecodeJSON decode json to interface from body
 func DecodeJSON(ctx context.Context, v interface{}) error {
@@ -46,6 +45,9 @@ func DecodeJSON(ctx context.Context, v interface{}) error {
 	return json.Unmarshal(data, v)
 }
 
+var ctxBodyKey uint8
+
+// FetchBody fetch request body from context
 func FetchBody(ctx context.Context) ([]byte, bool) {
 	body, ok := ctx.Value(&ctxBodyKey).(buffer)
 	return []byte(body), ok

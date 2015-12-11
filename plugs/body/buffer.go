@@ -10,10 +10,6 @@ func (b *buffer) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func (b *buffer) Bytes() []byte {
-	return *b
-}
-
 func (b *buffer) free() {
 	// Don't hold on to large buffers.
 	if len(*b) <= 1024 {
