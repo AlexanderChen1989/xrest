@@ -35,6 +35,7 @@ func slowRoute(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 func newRouter() *router.Router {
 	r := router.New()
 	r.Get("/api/hello/:name", xrest.HandleFunc(helloRoute))
+	r.Post("/api/hello/:name", xrest.HandleFunc(helloRoute))
 	r.Get("/api/slow", xrest.HandleFunc(slowRoute))
 	return r
 }
@@ -52,7 +53,9 @@ func main() {
 			static.Prefix("public"),
 		),
 	)
-	p.Plug(body.New())
+	p.Plug(body.New(func(r *http.Request, err error) {
+		fmt.Println("Error: ", err)
+	}))
 	p.Plug(newRouter())
 
 	http.ListenAndServe(":8080", p.HTTPHandler())

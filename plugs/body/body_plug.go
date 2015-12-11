@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"sync"
 
 	"github.com/AlexanderChen1989/xrest"
 
@@ -13,52 +12,36 @@ import (
 )
 
 type body struct {
-	pool *sync.Pool
-	next xrest.Handler
+	onError func(r *http.Request, err error)
+	next    xrest.Handler
 }
 
 type readCloser struct {
-	io.ReadCloser
+	rc  io.ReadCloser
 	bp  *body
 	buf buffer
 }
 
-// Use simple []byte instead of bytes.Buffer to avoid large dependency.
-type buffer []byte
-
-func (b *buffer) Write(p []byte) (n int, err error) {
-	*b = append(*b, p...)
-	return len(p), nil
+func newBody(onError func(r *http.Request, err error)) *body {
+	return &body{onError: onError}
 }
 
-func (b *buffer) Bytes() []byte {
-	return *b
+func New(onError func(r *http.Request, err error)) xrest.Plugger {
+	return newBody(onError)
 }
 
-func newBody() *body {
-	return &body{
-		pool: &sync.Pool{
-			New: func() interface{} {
-				return buffer{}
-			},
-		},
-	}
-}
-
-func New() xrest.Plugger {
-	return newBody()
-}
-
-// Close return buf to pool
-func (rc *readCloser) Close() error {
-	// Don't hold on to pp structs with large buffers.
-	if len(rc.buf) <= 1024 {
-		rc.buf = rc.buf[:0]
-		rc.bp.pool.Put(rc.buf)
-	}
-
-	return rc.ReadCloser.Close()
-}
+// // Read return buf to pool
+// func (rc *readCloser) Read(p []byte) (int, error) {
+// 	return rc.rc.Read(p)
+// }
+//
+// // Close return buf to pool
+// func (rc *readCloser) Close() error {
+// 	rc.buf.free()
+// 	err := rc.rc.Close()
+// 	fmt.Println("Close Error: ", err)
+// 	return err
+// }
 
 // ErrBodyNotPlugged body plug not plugged
 var ErrBodyNotPlugged = errors.New("Body not plugged.")
@@ -88,19 +71,18 @@ func (bp *body) Plug(h xrest.Handler) xrest.Handler {
 
 func (bp *body) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if _, ok := FetchBody(ctx); !ok {
-		buf := bp.pool.Get().(buffer)
+		buf := getBuffer()
+		defer buf.free()
+
 		if _, err := io.Copy(&buf, r.Body); err != nil {
-			bp.pool.Put(buf)
+			if bp.onError != nil {
+				bp.onError(r, err)
+			}
+		} else {
+			ctx = context.WithValue(ctx, &ctxBodyKey, buf)
 		}
-		ctx = context.WithValue(ctx, &ctxBodyKey, buf)
-		// reconstruct http.Request.Body
-		rc := &readCloser{
-			ReadCloser: r.Body,
-			bp:         bp,
-			buf:        buf,
-		}
-		r.Body = rc
 	}
 
 	bp.next.ServeHTTP(ctx, w, r)
+	return
 }

@@ -11,7 +11,7 @@ import (
 )
 
 func TestClose(t *testing.T) {
-	close := New()
+	close := New(nil)
 
 	dur := 2 * time.Second
 	pipe := xrest.NewPipeline()
