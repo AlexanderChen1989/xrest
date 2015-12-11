@@ -30,19 +30,6 @@ func New(onError func(r *http.Request, err error)) xrest.Plugger {
 	return newBody(onError)
 }
 
-// // Read return buf to pool
-// func (rc *readCloser) Read(p []byte) (int, error) {
-// 	return rc.rc.Read(p)
-// }
-//
-// // Close return buf to pool
-// func (rc *readCloser) Close() error {
-// 	rc.buf.free()
-// 	err := rc.rc.Close()
-// 	fmt.Println("Close Error: ", err)
-// 	return err
-// }
-
 // ErrBodyNotPlugged body plug not plugged
 var ErrBodyNotPlugged = errors.New("Body not plugged.")
 
