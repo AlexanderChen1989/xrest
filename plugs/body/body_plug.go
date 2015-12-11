@@ -1,7 +1,6 @@
 package body
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -21,14 +20,26 @@ type body struct {
 type readCloser struct {
 	io.ReadCloser
 	bp  *body
-	buf *bytes.Buffer
+	buf buffer
+}
+
+// Use simple []byte instead of bytes.Buffer to avoid large dependency.
+type buffer []byte
+
+func (b *buffer) Write(p []byte) (n int, err error) {
+	*b = append(*b, p...)
+	return len(p), nil
+}
+
+func (b *buffer) Bytes() []byte {
+	return *b
 }
 
 func newBody() *body {
 	return &body{
 		pool: &sync.Pool{
 			New: func() interface{} {
-				return bytes.NewBuffer(nil)
+				return buffer{}
 			},
 		},
 	}
@@ -40,7 +51,11 @@ func New() xrest.Plugger {
 
 // Close return buf to pool
 func (rc *readCloser) Close() error {
-	rc.bp.pool.Put(rc.buf)
+	// Don't hold on to pp structs with large buffers.
+	if len(rc.buf) <= 1024 {
+		rc.buf = rc.buf[:0]
+		rc.bp.pool.Put(rc.buf)
+	}
 
 	return rc.ReadCloser.Close()
 }
@@ -52,7 +67,7 @@ var ctxBodyKey uint8
 
 // DecodeJSON decode json to interface from body
 func DecodeJSON(ctx context.Context, v interface{}) error {
-	data, ok := ctx.Value(&ctxBodyKey).([]byte)
+	data, ok := FetchBody(ctx)
 
 	if !ok {
 		return ErrBodyNotPlugged
@@ -62,8 +77,8 @@ func DecodeJSON(ctx context.Context, v interface{}) error {
 }
 
 func FetchBody(ctx context.Context) ([]byte, bool) {
-	body, ok := ctx.Value(&ctxBodyKey).([]byte)
-	return body, ok
+	body, ok := ctx.Value(&ctxBodyKey).(buffer)
+	return []byte(body), ok
 }
 
 func (bp *body) Plug(h xrest.Handler) xrest.Handler {
@@ -73,12 +88,11 @@ func (bp *body) Plug(h xrest.Handler) xrest.Handler {
 
 func (bp *body) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if _, ok := FetchBody(ctx); !ok {
-		buf := bp.pool.Get().(*bytes.Buffer)
-		buf.Reset()
-		if _, err := io.Copy(buf, r.Body); err != nil {
+		buf := bp.pool.Get().(buffer)
+		if _, err := io.Copy(&buf, r.Body); err != nil {
 			bp.pool.Put(buf)
 		}
-		ctx = context.WithValue(ctx, &ctxBodyKey, buf.Bytes())
+		ctx = context.WithValue(ctx, &ctxBodyKey, buf)
 		// reconstruct http.Request.Body
 		rc := &readCloser{
 			ReadCloser: r.Body,
