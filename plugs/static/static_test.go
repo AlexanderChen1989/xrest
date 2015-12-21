@@ -46,7 +46,7 @@ func TestStatic(t *testing.T) {
 		pipe := xrest.NewPipeline()
 		pipe.Plug(s)
 		pipe.Plug(
-			xrest.HandleFunc(
+			xrest.HandlerFunc(
 				func(ctx context.Context, res http.ResponseWriter, req *http.Request) {
 					if c.exists {
 						t.Error("should not be here\n")

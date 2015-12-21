@@ -29,7 +29,7 @@ func printChildren(n *Node, prefix string) {
 var fakeHandlerValue string
 
 func fakeHandler(val string) xrest.Handler {
-	return xrest.HandleFunc(func(context.Context, http.ResponseWriter, *http.Request) {
+	return xrest.HandlerFunc(func(context.Context, http.ResponseWriter, *http.Request) {
 		fakeHandlerValue = val
 	})
 }

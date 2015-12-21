@@ -55,10 +55,10 @@ func TestRouter(t *testing.T) {
 		noauth.Plug(newTestPlug(val))
 	}
 
-	auth.Get("/files", xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	auth.Get("/files", xrest.HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		assert.EqualValues(t, authVals, ctx.Value(&ctxTestPlug))
 	}))
-	noauth.Post("/login", xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	noauth.Post("/login", xrest.HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		assert.EqualValues(t, noauthVals, ctx.Value(&ctxTestPlug))
 	}))
 

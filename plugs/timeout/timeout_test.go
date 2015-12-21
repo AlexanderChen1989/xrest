@@ -14,7 +14,7 @@ func TestTimeout(t *testing.T) {
 
 	pipe := xrest.NewPipeline()
 	pipe.Plug(to)
-	pipe.Plug(xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	pipe.Plug(xrest.HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-ctx.Done():
 		case <-time.After(to.Duration + time.Second):
@@ -26,7 +26,7 @@ func TestTimeout(t *testing.T) {
 	to = newTimeout(0)
 	pipe = xrest.NewPipeline()
 	pipe.Plug(to)
-	pipe.Plug(xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	pipe.Plug(xrest.HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-ctx.Done():
 			t.Error("Shoud not timeout\n")

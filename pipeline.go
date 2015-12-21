@@ -46,6 +46,6 @@ func (p *Pipeline) SetHandler(h Handler) *Pipeline {
 
 func NewPipeline() *Pipeline {
 	return &Pipeline{
-		handler: HandleFunc(func(context.Context, http.ResponseWriter, *http.Request) {}),
+		handler: HandlerFunc(func(context.Context, http.ResponseWriter, *http.Request) {}),
 	}
 }

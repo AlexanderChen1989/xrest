@@ -16,7 +16,7 @@ func TestClose(t *testing.T) {
 	dur := 2 * time.Second
 	pipe := xrest.NewPipeline()
 	pipe.Plug(close)
-	pipe.Plug(xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	pipe.Plug(xrest.HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-ctx.Done():
 		case <-time.After(dur + time.Second):

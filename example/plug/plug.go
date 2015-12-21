@@ -12,7 +12,7 @@ import (
 func main() {
 	p := xrest.NewPipeline()
 
-	p.Plug(xrest.HandleFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	p.Plug(xrest.HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		// fmt.Println("Hello")
 	}))
 
