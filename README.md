@@ -9,4 +9,5 @@ JSON Restful API with context.Context in mind.
 - [ ] add docs
 - [ ] add a project site (github pages)
 - [ ] add a guide
+- [ ] add session plug
 - [ ] add more...
