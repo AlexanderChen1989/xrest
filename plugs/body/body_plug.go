@@ -4,12 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/AlexanderChen1989/xrest"
 
 	"golang.org/x/net/context"
 )
+
+func init() {
+	log.Println("This plug is deprecated. Please use mapstruct plug.")
+}
 
 type body struct {
 	onError func(r *http.Request, err error)
