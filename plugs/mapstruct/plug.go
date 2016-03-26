@@ -32,7 +32,7 @@ var ctxKey uint8
 
 func (p *plug) Plug(h xrest.Handler) xrest.Handler {
 	p.next = h
-	return nil
+	return p
 }
 
 func (p *plug) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func (p *plug) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Req
 		p.onError(ctx, w, r, err)
 		return
 	}
-	p.ServeHTTP(context.WithValue(ctx, &ctxKey, payload), w, r)
+	p.next.ServeHTTP(context.WithValue(ctx, &ctxKey, payload), w, r)
 }
 
 // ErrPlugNotPlugged mapstruct plug is not plugged to pipeline
