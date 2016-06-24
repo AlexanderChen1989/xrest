@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/AlexanderChen1989/xrest"
 
@@ -63,7 +64,17 @@ func (bp *body) Plug(h xrest.Handler) xrest.Handler {
 	return bp
 }
 
+const (
+	jsonMediaType = "application/json"
+)
+
 func (bp *body) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	mediaType := r.Header.Get("Content-Type")
+	if len(mediaType) > 0 && !strings.HasPrefix(mediaType, jsonMediaType) {
+		bp.next.ServeHTTP(ctx, w, r)
+		return
+	}
+
 	if _, ok := FetchBody(ctx); !ok {
 		buf := getBuffer()
 		defer buf.free()
