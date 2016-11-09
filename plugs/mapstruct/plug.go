@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/AlexanderChen1989/xrest"
 	"github.com/AlexanderChen1989/xrest/plugs"
@@ -35,7 +36,17 @@ func (p *plug) Plug(h xrest.Handler) xrest.Handler {
 	return p
 }
 
+const (
+	jsonMediaType = "application/json"
+)
+
 func (p *plug) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	mediaType := r.Header.Get("Content-Type")
+	if r.Method == "GET" || r.Method == "HEAD" || (len(mediaType) > 0 && !strings.HasPrefix(mediaType, jsonMediaType)) {
+		bp.next.ServeHTTP(ctx, w, r)
+		return
+	}
+
 	payload := map[string]interface{}{}
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil && p.onError != nil {

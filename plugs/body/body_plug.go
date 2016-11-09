@@ -70,7 +70,7 @@ const (
 
 func (bp *body) ServeHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	mediaType := r.Header.Get("Content-Type")
-	if len(mediaType) > 0 && !strings.HasPrefix(mediaType, jsonMediaType) {
+	if r.Method == "GET" || r.Method == "HEAD" || (len(mediaType) > 0 && !strings.HasPrefix(mediaType, jsonMediaType)) {
 		bp.next.ServeHTTP(ctx, w, r)
 		return
 	}

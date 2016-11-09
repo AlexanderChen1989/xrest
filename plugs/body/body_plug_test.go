@@ -55,6 +55,6 @@ func TestJSONDecodeIntegration(t *testing.T) {
 	)
 	var buf bytes.Buffer
 	assert.Nil(t, json.NewEncoder(&buf).Encode(&origin))
-	r, _ := http.NewRequest("GET", "/api/test", &buf)
+	r, _ := http.NewRequest("POST", "/api/test", &buf)
 	pipe.HTTPHandler().ServeHTTP(nil, r)
 }
